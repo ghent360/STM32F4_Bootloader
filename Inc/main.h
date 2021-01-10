@@ -23,14 +23,11 @@ extern "C" {
 void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
-#define PWM7_Pin LL_GPIO_PIN_5
-#define PWM7_GPIO_Port GPIOE
-#define PWM8_Pin LL_GPIO_PIN_6
-#define PWM8_GPIO_Port GPIOE
-#define Y_MAX_Pin LL_GPIO_PIN_14
-#define Y_MAX_GPIO_Port GPIOC
 #define ST_ENABLE_Pin LL_GPIO_PIN_0
 #define ST_ENABLE_GPIO_Port GPIOC
+#define SD_DETECT_Pin LL_GPIO_PIN_3
+#define SD_DETECT_GPIO_Port GPIOD
+
 #define X_MIN_Pin LL_GPIO_PIN_4
 #define X_MIN_GPIO_Port GPIOC
 #define Y_MIN_Pin LL_GPIO_PIN_5
@@ -39,28 +36,34 @@ void Error_Handler(void);
 #define Z_MIN_GPIO_Port GPIOB
 #define X_MAX_Pin LL_GPIO_PIN_1
 #define X_MAX_GPIO_Port GPIOB
+#define Y_MAX_Pin LL_GPIO_PIN_14
+#define Y_MAX_GPIO_Port GPIOC
 #define Z_MAX_Pin LL_GPIO_PIN_7
 #define Z_MAX_GPIO_Port GPIOE
 #define U_MIN_Pin LL_GPIO_PIN_8
 #define U_MIN_GPIO_Port GPIOE
 #define V_MIN_Pin LL_GPIO_PIN_9
 #define V_MIN_GPIO_Port GPIOE
-#define PWM9_Pin LL_GPIO_PIN_15
-#define PWM9_GPIO_Port GPIOD
-#define PWM6_Pin LL_GPIO_PIN_7
-#define PWM6_GPIO_Port GPIOC
+#if 0
 #define PWM1_Pin LL_GPIO_PIN_8
 #define PWM1_GPIO_Port GPIOA
 #define PWM2_Pin LL_GPIO_PIN_15
 #define PWM2_GPIO_Port GPIOA
-#define SD_DETECT_Pin LL_GPIO_PIN_3
-#define SD_DETECT_GPIO_Port GPIOD
 #define PWM3_Pin LL_GPIO_PIN_4
 #define PWM3_GPIO_Port GPIOB
 #define PWM4_Pin LL_GPIO_PIN_8
 #define PWM4_GPIO_Port GPIOB
 #define PWM5_Pin LL_GPIO_PIN_9
 #define PWM5_GPIO_Port GPIOB
+#define PWM6_Pin LL_GPIO_PIN_7
+#define PWM6_GPIO_Port GPIOC
+#define PWM7_Pin LL_GPIO_PIN_5
+#define PWM7_GPIO_Port GPIOE
+#define PWM8_Pin LL_GPIO_PIN_6
+#define PWM8_GPIO_Port GPIOE
+#define PWM9_Pin LL_GPIO_PIN_15
+#define PWM9_GPIO_Port GPIOD
+#endif
 
 /* Base address of the Flash sectors */
 #define ADDR_FLASH_SECTOR_0     ((uint32_t)0x08000000) /* Base @ of Sector 0, 16 Kbytes */

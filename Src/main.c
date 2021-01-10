@@ -218,11 +218,11 @@ static void MX_GPIO_Init(void)
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
+  //LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOD);
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
 
   /**/
   LL_GPIO_SetOutputPin(GPIOC, Y_MAX_Pin|ST_ENABLE_Pin|X_MIN_Pin|Y_MIN_Pin);
@@ -234,6 +234,7 @@ static void MX_GPIO_Init(void)
   LL_GPIO_SetOutputPin(GPIOE, Z_MAX_Pin|U_MIN_Pin|V_MIN_Pin);
 
   /**/
+#if 0  
   GPIO_InitStruct.Pin = PWM7_Pin|PWM8_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -241,6 +242,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   GPIO_InitStruct.Alternate = LL_GPIO_AF_3;
   LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+#endif
 
   /**/
   GPIO_InitStruct.Pin = Y_MAX_Pin|X_MIN_Pin|Y_MIN_Pin;
@@ -274,6 +276,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
+#if 0
   /**/
   GPIO_InitStruct.Pin = PWM9_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
@@ -300,6 +303,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#endif
 
   /**/
   GPIO_InitStruct.Pin = SD_DETECT_Pin;
@@ -307,6 +311,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(SD_DETECT_GPIO_Port, &GPIO_InitStruct);
 
+#if 0
   /**/
   GPIO_InitStruct.Pin = PWM3_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
@@ -324,6 +329,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   GPIO_InitStruct.Alternate = LL_GPIO_AF_3;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif  
 }
 
 /**
@@ -555,20 +561,20 @@ static void Jump_to_app() {
   LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOD);
   LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
   LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
-  LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+  //LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
   LL_RCC_DeInit();
   //__disable_irq();
 
-  NVIC->ICER[ 0 ] = 0xFFFFFFFF ;
-  NVIC->ICER[ 1 ] = 0xFFFFFFFF ;
-  NVIC->ICER[ 2 ] = 0xFFFFFFFF ;
+  NVIC->ICER[ 0 ] = 0xFFFFFFFF;
+  NVIC->ICER[ 1 ] = 0xFFFFFFFF;
+  NVIC->ICER[ 2 ] = 0xFFFFFFFF;
 
-  NVIC->ICPR[ 0 ] = 0xFFFFFFFF ;
-  NVIC->ICPR[ 1 ] = 0xFFFFFFFF ;
-  NVIC->ICPR[ 2 ] = 0xFFFFFFFF ;
+  NVIC->ICPR[ 0 ] = 0xFFFFFFFF;
+  NVIC->ICPR[ 1 ] = 0xFFFFFFFF;
+  NVIC->ICPR[ 2 ] = 0xFFFFFFFF;
 
   SysTick->CTRL = 0;
-  SCB->ICSR |= SCB_ICSR_PENDSTCLR_Msk ;
+  SCB->ICSR |= SCB_ICSR_PENDSTCLR_Msk;
   SCB->SHCSR &= ~( SCB_SHCSR_USGFAULTENA_Msk |
                    SCB_SHCSR_BUSFAULTENA_Msk |
                    SCB_SHCSR_MEMFAULTENA_Msk );
