@@ -498,12 +498,28 @@ static void Jump_to_app() {
   LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
   LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
   LL_AHB1_GRP1_DisableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
-  __disable_irq();
+  LL_RCC_DeInit();
+  //__disable_irq();
+
+  NVIC->ICER[ 0 ] = 0xFFFFFFFF ;
+  NVIC->ICER[ 1 ] = 0xFFFFFFFF ;
+  NVIC->ICER[ 2 ] = 0xFFFFFFFF ;
+
+  NVIC->ICPR[ 0 ] = 0xFFFFFFFF ;
+  NVIC->ICPR[ 1 ] = 0xFFFFFFFF ;
+  NVIC->ICPR[ 2 ] = 0xFFFFFFFF ;
+
+  SysTick->CTRL = 0;
+  SCB->ICSR |= SCB_ICSR_PENDSTCLR_Msk ;
+  SCB->SHCSR &= ~( SCB_SHCSR_USGFAULTENA_Msk |
+                   SCB_SHCSR_BUSFAULTENA_Msk |
+                   SCB_SHCSR_MEMFAULTENA_Msk );
   uint32_t sp = fw_start[0];
   uint32_t pc = fw_start[1];
   SCB->VTOR = FLASH_USER_START_ADDR;
   __asm__ __volatile__(
-      "mov sp,%0\n\t"
+      "msr msp, %0\n\t"
+      "msr psp, %0\n\t"
       "bx %1\n\t"
       : /* no output */
       : "r" (sp), "r" (pc)
