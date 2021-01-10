@@ -17,6 +17,8 @@ static void Jump_to_app();
 static uint8_t flash_firmware(FIL*, uint32_t size);
 static uint8_t erase_flash(uint32_t address, uint32_t size);
 static uint8_t flash_buffer(uint32_t address, uint32_t size);
+static uint8_t verify_firmware(FIL*, uint32_t size);
+static uint8_t verify_buffer(uint32_t address, uint32_t size);
 extern uint8_t sd_use_4b_mode;
 
 #if 0
@@ -45,10 +47,6 @@ int main(void)
   MX_FATFS_Init();
   DWT_Delay_Init();
   if (f_mount(&fs, "", 1) != FR_OK) {
-    while(1) {
-      signal(-1, 2);
-      DWT_Delay_ms(2000);
-    }
     Jump_to_app();
   }
   if (f_stat("firmware.bin", &info) != FR_OK) {
@@ -59,9 +57,14 @@ int main(void)
   }
   res = flash_firmware(&fw_file, info.fsize);
   if (res != 0) {
+    f_close(&fw_file);
     panic();
   }
+  res = verify_firmware(&fw_file, info.fsize);
   f_close(&fw_file);
+  if (res != 0) {
+    panic();
+  }
   f_unlink("0:/firmware.cur");
   f_rename("0:/firmware.bin", "0:/firmware.cur");
   Jump_to_app();
@@ -401,13 +404,13 @@ static uint8_t flash_firmware(FIL* file, uint32_t size) {
     return 1;
   }
   LL_GPIO_ResetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
-  LL_GPIO_ResetOutputPin(U_MIN_GPIO_Port, V_MIN_Pin);
+  LL_GPIO_ResetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
   res = erase_flash(FLASH_USER_START_ADDR, size);
   LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
-  LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, V_MIN_Pin);
+  LL_GPIO_SetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
   if (res != 0) {
     HAL_FLASH_Lock();
-    for (buffer_size = 10; buffer_size; buffer_size--) {
+    for (buffer_size = 5; buffer_size; buffer_size--) {
       signal(2, res);
       DWT_Delay_ms(2000);
     }
@@ -422,8 +425,8 @@ static uint8_t flash_firmware(FIL* file, uint32_t size) {
     if (f_read(file, io_buffer, buffer_size, &buffer_size) != FR_OK) {
       HAL_FLASH_Lock();
       LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
-      LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, V_MIN_Pin);
-      for (buffer_size = 10; buffer_size; buffer_size--) {
+      LL_GPIO_SetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
+      for (buffer_size = 5; buffer_size; buffer_size--) {
         signal(3, 3);
         DWT_Delay_ms(2000);
       }
@@ -435,8 +438,8 @@ static uint8_t flash_firmware(FIL* file, uint32_t size) {
     if (res != 0) {
       HAL_FLASH_Lock();
       LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
-      LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, V_MIN_Pin);
-      for (buffer_size = 10; buffer_size; buffer_size--) {
+      LL_GPIO_SetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
+      for (buffer_size = 5; buffer_size; buffer_size--) {
         signal(4, res);
         DWT_Delay_ms(2000);
       }
@@ -447,13 +450,58 @@ static uint8_t flash_firmware(FIL* file, uint32_t size) {
     size -= buffer_size;
   }
   HAL_FLASH_Lock();
+  return 0;
+}
+
+static uint8_t verify_firmware(FIL* file, uint32_t size) {
+  uint32_t fw_prog_addr = FLASH_USER_START_ADDR;
+  UINT buffer_size;
+  uint8_t res;
+  if (f_lseek(file, 0) != FR_OK) {
+    for (buffer_size = 5; buffer_size; buffer_size--) {
+      signal(5, res);
+      DWT_Delay_ms(2000);
+    }
+    return 5;
+  }
+  while (size) {
+    buffer_size = sizeof(io_buffer);
+    if (buffer_size > size) {
+      buffer_size = size;
+    }
+    LL_GPIO_ResetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
+    if (f_read(file, io_buffer, buffer_size, &buffer_size) != FR_OK) {
+      LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
+      LL_GPIO_SetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
+      for (buffer_size = 5; buffer_size; buffer_size--) {
+        signal(3, 3);
+        DWT_Delay_ms(2000);
+      }
+      return 3;
+    }
+    LL_GPIO_SetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
+    LL_GPIO_ResetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
+    res = verify_buffer(fw_prog_addr, buffer_size / 4);
+    if (res != 0) {
+      LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
+      LL_GPIO_SetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
+      for (buffer_size = 5; buffer_size; buffer_size--) {
+        signal(4, res);
+        DWT_Delay_ms(2000);
+      }
+      return 4;
+    }
+    LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
+    fw_prog_addr += buffer_size;
+    size -= buffer_size;
+  }
   for (buffer_size = 6; buffer_size; buffer_size--) {
     LL_GPIO_ResetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
-    LL_GPIO_ResetOutputPin(U_MIN_GPIO_Port, V_MIN_Pin);
+    LL_GPIO_ResetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
     DWT_Delay_ms(250);
     LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, U_MIN_Pin);
     DWT_Delay_ms(125);
-    LL_GPIO_SetOutputPin(U_MIN_GPIO_Port, V_MIN_Pin);
+    LL_GPIO_SetOutputPin(V_MIN_GPIO_Port, V_MIN_Pin);
     DWT_Delay_ms(125);
   }
   return 0;
@@ -461,7 +509,7 @@ static uint8_t flash_firmware(FIL* file, uint32_t size) {
 
 static FLASH_EraseInitTypeDef EraseInitStruct;
 
-uint8_t erase_flash(uint32_t address, uint32_t size) {
+static uint8_t erase_flash(uint32_t address, uint32_t size) {
   uint32_t fw_prog_end = address + size;
   int8_t start_sector = GetSector(address);
   int8_t end_sector = GetSector(fw_prog_end);
@@ -479,9 +527,19 @@ uint8_t erase_flash(uint32_t address, uint32_t size) {
   return 0;
 }
 
-uint8_t flash_buffer(uint32_t address, uint32_t size) {
+static uint8_t flash_buffer(uint32_t address, uint32_t size) {
   for (uint32_t idx = 0; idx < size; idx++) {
     if (HAL_FLASH_Program(TYPEPROGRAM_WORD, address, io_buffer[idx]) != HAL_OK) {
+      return 1;
+    }
+    address += 4;
+  }
+  return 0;
+}
+
+static uint8_t verify_buffer(uint32_t address, uint32_t size) {
+  for (uint32_t idx = 0; idx < size; idx++) {
+    if (*(uint32_t*)address != io_buffer[idx]) {
       return 1;
     }
     address += 4;
