@@ -21,9 +21,7 @@
  * the BSP_SD_Init() call in the SD_Initialize() and add a call to
  * BSP_SD_Init() elsewhere in the application.
  */
-/* USER CODE BEGIN disableSDInit */
 /* #define DISABLE_SD_INIT */
-/* USER CODE END disableSDInit */
 
 /* Private variables ---------------------------------------------------------*/
 /* Disk status */
@@ -102,9 +100,6 @@ DSTATUS SD_status(BYTE lun)
   return SD_CheckStatus(lun);
 }
 
-/* USER CODE BEGIN beforeReadSection */
-/* can be used to modify previous code / undefine following code / add new code */
-/* USER CODE END beforeReadSection */
 /**
   * @brief  Reads Sector(s)
   * @param  lun : not used
@@ -132,9 +127,6 @@ DRESULT SD_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
   return res;
 }
 
-/* USER CODE BEGIN beforeWriteSection */
-/* can be used to modify previous code / undefine following code / add new code */
-/* USER CODE END beforeWriteSection */
 /**
   * @brief  Writes Sector(s)
   * @param  lun : not used
@@ -164,9 +156,6 @@ DRESULT SD_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 }
 #endif /* _USE_WRITE == 1 */
 
-/* USER CODE BEGIN beforeIoctlSection */
-/* can be used to modify previous code / undefine following code / add new code */
-/* USER CODE END beforeIoctlSection */
 /**
   * @brief  I/O control operation
   * @param  lun : not used
