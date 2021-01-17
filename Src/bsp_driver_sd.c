@@ -31,8 +31,6 @@
 
 extern SD_HandleTypeDef hsd;
 
-uint8_t sd_use_4b_mode = 1;
-
 /**
   * @brief  Initializes the SD card device.
   * @retval SD status
@@ -47,17 +45,6 @@ uint8_t BSP_SD_Init(void)
   }
   /* HAL SD initialization */
   sd_state = HAL_SD_Init(&hsd);
-  /* Configure SD Bus width (4 bits mode selected) */
-  if (sd_state == MSD_OK)
-  {
-    if (sd_use_4b_mode) {
-      /* Enable wide operation */
-      if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK)
-      {
-        sd_state = MSD_ERROR;
-      }
-    }
-  }
 
   return sd_state;
 }

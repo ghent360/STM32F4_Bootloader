@@ -19,7 +19,6 @@ static uint8_t erase_flash(uint32_t address, uint32_t size);
 static uint8_t flash_buffer(uint32_t address, uint32_t size);
 static uint8_t verify_firmware(FIL*, uint32_t size);
 static uint8_t verify_buffer(uint32_t address, uint32_t size);
-extern uint8_t sd_use_4b_mode;
 
 #if 0
 void UART_Printf(const char* fmt, ...) {
@@ -164,7 +163,6 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
   hsd.Init.ClockDiv = 4;
-  sd_use_4b_mode = 0;
 }
 
 #if 0
